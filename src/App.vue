@@ -1,26 +1,37 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+	<router-view v-slot="{ Component }">
+		<transition name="slide-fade">
+			<component :is="Component" :key="$router.path" />
+		</transition>
+	</router-view>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
+	name: "App",
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+@import "../node_modules/@syncfusion/ej2-base/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2-vue-inputs/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2-vue-buttons/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2-vue-layouts/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2-vue-notifications/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2-vue-lists/styles/bootstrap5.css";
+
+.slide-fade-enter-active {
+	transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+	transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+	transform: translateX(20px);
+	opacity: 0;
 }
 </style>
+
