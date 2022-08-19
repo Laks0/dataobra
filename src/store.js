@@ -15,6 +15,11 @@ const store = createStore({
 			state.presupuesto = data;
 		},
 
+		guardarTabla(state, data) {
+			state.presupuesto.tabla = data.tabla;
+			state.presupuesto.staticData = data.staticData;
+		},
+
 		login(state, data) {
 			state.user = data.usuario;
 			state.logged = true;
@@ -62,6 +67,23 @@ const store = createStore({
 						reject(err);
 					});
 			});
+		},
+
+		// Actualizamos la tabla del presupuesto
+		actualizarTabla({commit, state}, {tabla, static_data}) {
+			return new Promise((resolve, reject) => {
+				http.put("/presupuesto", {
+					tabla,
+					static_data,
+					p_id: state.presupuesto.p_id,
+					total: 0
+				})
+					.then(res => {
+						commit("guardarTabla", {tabla, static_data});
+						resolve(res);
+					})
+					.catch(err => reject(err));
+			})
 		},
 
 		checkCookie({commit}) {

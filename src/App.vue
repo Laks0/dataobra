@@ -13,12 +13,7 @@ export default {
 </script>
 
 <style>
-@import "../node_modules/@syncfusion/ej2-base/styles/bootstrap5.css";
-@import "../node_modules/@syncfusion/ej2-vue-inputs/styles/bootstrap5.css";
-@import "../node_modules/@syncfusion/ej2-vue-buttons/styles/bootstrap5.css";
-@import "../node_modules/@syncfusion/ej2-vue-layouts/styles/bootstrap5.css";
-@import "../node_modules/@syncfusion/ej2-vue-notifications/styles/bootstrap5.css";
-@import "../node_modules/@syncfusion/ej2-vue-lists/styles/bootstrap5.css";
+@import "../node_modules/@syncfusion/ej2/bootstrap5.css";
 
 .slide-fade-enter-active {
 	transition: all 0.3s ease-out;
