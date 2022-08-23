@@ -8,6 +8,7 @@
 				:contextMenuItems="contextMenuItems"
 				parentIdMapping="parentId"
 				@contextMenuClick="contextMenuClick"
+				@cellSave="cellSaved"
 				rowHeight="20px"
 				><e-columns>
 					<e-column field="nombre" headerText="Nombre"></e-column>
@@ -64,14 +65,22 @@ export default {
 			creandoConcepto.value = false;
 		}
 
+		function cellSaved(ev) {
+			let rowIndex = tabla.value.findIndex(row => row.id === ev.rowData.id);
+			let col = ev.columnName;
+			let val = ev.value;
+
+			edit(rowIndex, col, val);
+		}
+
 		// DATA DEL PRESUPUESTO //
 		const store = useStore();
 
-		const presupuesto = ref(store.state.presupuesto);
-		const staticData = JSON.parse(presupuesto.value.static_data);
+		const presupuesto = store.state.presupuesto;
+		const staticData = JSON.parse(presupuesto.static_data);
 
-		let tablaReferencias = JSON.parse(presupuesto.value.tabla);
-		let tabla = ref(derreferenciarTabla(tablaReferencias, staticData));
+		let tablaReferencias = JSON.parse(presupuesto.tabla);
+		const tabla = ref(derreferenciarTabla(tablaReferencias, staticData));
 
 		// CREACIÓN DE CONCEPTOS //
 		function crearConceptoEstatico(concepto) {
@@ -97,6 +106,15 @@ export default {
 			guardar(tabla.value, staticData);
 		}
 
+		// EDICIÓN DE CONCEPTOS //
+		function edit(index, columna, valor) {
+			let valorTabla = [...tabla.value];
+			valorTabla[index][columna] = valor;
+			tabla.value = valorTabla;
+
+			guardar(tabla.value, staticData);
+		}
+
 		return {
 			editSettings,
 			tabla,
@@ -104,7 +122,8 @@ export default {
 			contextMenuClick,
 			crearConceptoEstatico,
 			creandoConcepto,
-			cerrarDialogoConcepto
+			cerrarDialogoConcepto,
+			cellSaved
 		}
 	},
 

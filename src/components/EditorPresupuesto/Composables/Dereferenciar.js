@@ -14,7 +14,9 @@ export default function derreferenciarTabla(tabla, staticData) {
 		let concepto = Object.assign({
 			id: referencia.id,
 			cantidad: referencia.cantidad,
-			precio: 0
+			precio: referencia.precio,
+			parentId: referencia.parentId,
+			staticId: referencia.staticId,
 		}, staticData[referencia.staticId]);
 
 		tablaFinal.push(concepto);

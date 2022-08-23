@@ -6,7 +6,8 @@ export default function tablaReferencias(tabla) {
 			id:       concepto.id,
 			staticId: concepto.staticId,
 			cantidad: concepto.cantidad,
-			parentId: concepto.parentId
+			parentId: concepto.parentId,
+			precio:   concepto.precio
 		}
 
 		referencias.unshift(referencia);
