@@ -16,8 +16,8 @@ const store = createStore({
 		},
 
 		guardarTabla(state, data) {
-			state.presupuesto.tabla = data.tabla;
-			state.presupuesto.staticData = data.staticData;
+			state.presupuesto.tabla = JSON.stringify(data.tabla);
+			state.presupuesto.staticData = JSON.stringify(data.staticData);
 		},
 
 		login(state, data) {

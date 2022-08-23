@@ -23,6 +23,12 @@
 			@creado="crearConceptoEstatico"
 			@cerrado="cerrarDialogoConcepto"
 		/>
+
+		<dialogoSeleccionarConcepto
+				:visible="seleccionandoConcepto"
+				@selConcepto="crearConceptoLocal"
+				@cerrado="cerrarDialogoReferencia"
+				/>
 	</div>
 </template>
 
@@ -37,8 +43,10 @@ import { TreeGridComponent as ej2Treegrid,
 } from '@syncfusion/ej2-vue-treegrid';
 import derreferenciarTabla from "./Composables/Dereferenciar.js";
 import dialogoNuevoConcepto from "./DialogoNuevoConcepto.vue";
+import dialogoSeleccionarConcepto from "./DialogoSeleccionarConcepto.vue";
 
 import guardar from "./Composables/Guardar.js";
+import { Concepto } from "./Clases/Concepto.js";
 
 export default {
 	setup() {
@@ -51,18 +59,26 @@ export default {
 		};
 
 		const contextMenuItems = [
-			{text: "Crear concepto", id:"nuevoConcepto"}
+			{text: "Crear concepto", id: "nuevoConcepto"},
+			{text: "Referenciar concepto", id: "nuevaReferencia"},
 		];
 
 		const creandoConcepto = ref(false);
+		const seleccionandoConcepto = ref(false);
 		const contextMenuClick = function (ev) {
 			if (ev.item.id === "nuevoConcepto") {
 				creandoConcepto.value = true;
+			}
+			if (ev.item.id === "nuevaReferencia") {
+				seleccionandoConcepto.value = true;
 			}
 		}
 
 		function cerrarDialogoConcepto() {
 			creandoConcepto.value = false;
+		}
+		function cerrarDialogoReferencia() {
+			seleccionandoConcepto.value = false;
 		}
 
 		function cellSaved(ev) {
@@ -87,12 +103,12 @@ export default {
 			const id = Date.now();
 			staticData[id] = concepto;
 
-			crearConceptoLocal(id, 1);
+			crearConceptoLocal(id);
 		}
 
-		function crearConceptoLocal(staticId, cantidad) {
+		function crearConceptoLocal(staticId) {
 			let concepto = Object.assign({
-				cantidad: cantidad,
+				cantidad: 1,
 				staticId: staticId,
 				parentId: null,
 				id: Date.now(),
@@ -109,9 +125,24 @@ export default {
 		// EDICIÓN DE CONCEPTOS //
 		function edit(index, columna, valor) {
 			let valorTabla = [...tabla.value];
+
+			// Si la columna pertenece a la clase concepto (es de un concepto estático)
+			// cambiar el concepto estático y no el local
+			let colConcepto = Object.getOwnPropertyNames(new Concepto);
+			if (colConcepto.includes(columna)) {
+				let fila = valorTabla[index];
+				editarConceptoEstatico(fila.staticId, columna, valor);
+				return
+			}
+
 			valorTabla[index][columna] = valor;
 			tabla.value = valorTabla;
 
+			guardar(tabla.value, staticData);
+		}
+
+		function editarConceptoEstatico(staticId, columna, valor) {
+			staticData[staticId][columna] = valor;
 			guardar(tabla.value, staticData);
 		}
 
@@ -121,9 +152,13 @@ export default {
 			contextMenuItems,
 			contextMenuClick,
 			crearConceptoEstatico,
+			crearConceptoLocal,
 			creandoConcepto,
 			cerrarDialogoConcepto,
-			cellSaved
+			cerrarDialogoReferencia,
+			cellSaved,
+			staticData,
+			seleccionandoConcepto
 		}
 	},
 
@@ -132,6 +167,7 @@ export default {
 		eColumn,
 		eColumns,
 		dialogoNuevoConcepto,
+		dialogoSeleccionarConcepto
 	},
 
 	provide: {
