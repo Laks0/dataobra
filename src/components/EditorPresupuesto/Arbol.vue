@@ -1,12 +1,14 @@
 <template>
 	<div class="mainDiv">
 		<ej2-treegrid
+				ref="arbol"
 				id="arbol"
 				class="arbol"
 				:dataSource="tabla"
 				:editSettings="editSettings"
 				:contextMenuItems="contextMenuItems"
 				parentIdMapping="parentId"
+				idMapping="id"
 				@contextMenuClick="contextMenuClick"
 				@cellSave="cellSaved"
 				rowHeight="20px"
@@ -51,6 +53,8 @@ import { Concepto } from "./Clases/Concepto.js";
 export default {
 	setup() {
 		// CONFIGURACIÓN DEL ÁRBOL //
+		const arbol = ref(null);
+
 		const editSettings = {
 			allowEditing: true,
 			mode: "Cell",
@@ -100,7 +104,7 @@ export default {
 
 		// CREACIÓN DE CONCEPTOS //
 		function crearConceptoEstatico(concepto) {
-			const id = Date.now();
+			const id = String(Date.now());
 			staticData[id] = concepto;
 
 			crearConceptoLocal(id);
@@ -115,34 +119,39 @@ export default {
 				precio: 0,
 			}, staticData[staticId]);
 
-			let valorTabla = [...tabla.value];
-			valorTabla.unshift(concepto);
-			tabla.value = valorTabla;
+			tabla.value.unshift(concepto);
+			tabla.value = [...tabla.value];
 
 			guardar(tabla.value, staticData);
 		}
 
 		// EDICIÓN DE CONCEPTOS //
 		function edit(index, columna, valor) {
-			let valorTabla = [...tabla.value];
-
 			// Si la columna pertenece a la clase concepto (es de un concepto estático)
 			// cambiar el concepto estático y no el local
 			let colConcepto = Object.getOwnPropertyNames(new Concepto);
 			if (colConcepto.includes(columna)) {
-				let fila = valorTabla[index];
+				let fila = tabla.value[index];
 				editarConceptoEstatico(fila.staticId, columna, valor);
 				return
 			}
 
-			valorTabla[index][columna] = valor;
-			tabla.value = valorTabla;
+			tabla.value[index][columna] = valor;
+			tabla.value = [...tabla.value];
 
 			guardar(tabla.value, staticData);
 		}
 
 		function editarConceptoEstatico(staticId, columna, valor) {
 			staticData[staticId][columna] = valor;
+
+			tabla.value.forEach((row, i) => {
+				if (row.staticId === staticId) {
+					tabla.value[i][columna] = valor;
+				}
+			});
+			tabla.value = [ ...tabla.value ];
+
 			guardar(tabla.value, staticData);
 		}
 
@@ -158,7 +167,8 @@ export default {
 			cerrarDialogoReferencia,
 			cellSaved,
 			staticData,
-			seleccionandoConcepto
+			seleccionandoConcepto,
+			arbol
 		}
 	},
 
