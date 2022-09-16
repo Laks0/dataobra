@@ -6,17 +6,22 @@
 				class="arbol"
 				:dataSource="tabla"
 				:editSettings="editSettings"
+				:selectionSettings="selectionSettings"
 				:contextMenuItems="contextMenuItems"
+				:allowRowDragAndDrop="true"
 				parentIdMapping="parentId"
 				idMapping="id"
+				:treeColumnIndex="1"
+				@rowDrop="onRowDrop"
 				@contextMenuClick="contextMenuClick"
 				@cellSave="cellSaved"
 				rowHeight="20px"
-				><e-columns>
-					<e-column field="nombre" headerText="Nombre"></e-column>
-					<e-column field="cantidad" headerText="Cantidad"></e-column>
-					<e-column field="valorUnitario" headerText="Valor Unitario" format="C"></e-column>
-					<e-column field="precio" headerText="Precio" format="C"></e-column>
+			><e-columns>
+						<e-column field="id" :isPrimaryKey="true" width="0"></e-column>
+						<e-column field="nombre" headerText="Nombre"></e-column>
+						<e-column field="cantidad" headerText="Cantidad"></e-column>
+						<e-column field="valorUnitario" headerText="Valor Unitario" format="C"></e-column>
+						<e-column field="precio" headerText="Precio" format="C"></e-column>
 		</e-columns>
 		</ej2-treegrid>
 
@@ -41,7 +46,8 @@ import { TreeGridComponent as ej2Treegrid,
 	ColumnsDirective as eColumns,
 	ColumnDirective as eColumn,
 	ContextMenu,
-	Edit
+	Edit,
+	RowDD
 } from '@syncfusion/ej2-vue-treegrid';
 import derreferenciarTabla from "./Composables/Dereferenciar.js";
 import dialogoNuevoConcepto from "./DialogoNuevoConcepto.vue";
@@ -60,6 +66,10 @@ export default {
 			mode: "Cell",
 			allowAdding: true,
 			allowDeleting: true
+		};
+
+		const selectionSettings = {
+			type: "Multiple",
 		};
 
 		const contextMenuItems = [
@@ -155,8 +165,29 @@ export default {
 			guardar(tabla.value, staticData);
 		}
 
+		function onRowDrop(ev) {
+			let newParentId = null;
+
+			const dropElement = arbol.value.getRowByIndex(ev.dropIndex);
+			const dropInfo = arbol.value.getRowInfo(dropElement).rowData;
+
+			if (ev.dropPosition === "middleSegment") {
+				newParentId = dropInfo.id;
+			} else {
+				newParentId = dropInfo.parentId;
+			}
+
+			const fromIndexTabla = tabla.value.findIndex(row => row.id === ev.data[0].id);
+			tabla.value[fromIndexTabla].parentId = newParentId;
+
+			tabla.value = [ ...tabla.value ];
+
+			guardar(tabla.value, staticData);
+		}
+
 		return {
 			editSettings,
+			selectionSettings,
 			tabla,
 			contextMenuItems,
 			contextMenuClick,
@@ -168,7 +199,8 @@ export default {
 			cellSaved,
 			staticData,
 			seleccionandoConcepto,
-			arbol
+			arbol,
+			onRowDrop,
 		}
 	},
 
@@ -181,7 +213,7 @@ export default {
 	},
 
 	provide: {
-		treegrid: [ ContextMenu, Edit ]
+		treegrid: [ RowDD, ContextMenu, Edit ]
 	}
 }
 </script>
