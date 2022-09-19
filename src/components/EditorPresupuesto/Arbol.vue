@@ -186,6 +186,14 @@ export default {
 			}
 
 			const fromIndexTabla = tabla.value.findIndex(row => row.id === ev.data[0].id);
+			const fromRow = tabla.value[fromIndexTabla];
+
+			if (dropInfo.tipo === "MANO" || dropInfo.tipo === "MATERIAL" || fromRow.tipo === "RUBRO") {
+				ev.cancel = true;
+				tabla.value = [...tabla.value];
+				return
+			}
+
 			tabla.value[fromIndexTabla].parentId = newParentId;
 
 			// Recalculo el precio de la nueva posición del elemento y de la vieja
