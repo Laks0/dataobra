@@ -54,6 +54,7 @@ import dialogoNuevoConcepto from "./DialogoNuevoConcepto.vue";
 import dialogoSeleccionarConcepto from "./DialogoSeleccionarConcepto.vue";
 
 import guardar from "./Composables/Guardar.js";
+import calcularPrecio from "./Composables/CalcularPrecio.js";
 import { Concepto } from "./Clases/Concepto.js";
 
 export default {
@@ -121,13 +122,14 @@ export default {
 		}
 
 		function crearConceptoLocal(staticId) {
+			const conceptoEstatico = staticData[staticId];
 			let concepto = Object.assign({
 				cantidad: 1,
 				staticId: staticId,
 				parentId: null,
 				id: Date.now(),
-				precio: 0,
-			}, staticData[staticId]);
+				precio: conceptoEstatico.valorUnitario,
+			}, conceptoEstatico);
 
 			tabla.value.unshift(concepto);
 			tabla.value = [...tabla.value];
@@ -147,20 +149,26 @@ export default {
 			}
 
 			tabla.value[index][columna] = valor;
-			tabla.value = [...tabla.value];
+			tabla.value = calcularPrecio(tabla.value, tabla.value[index].id);
 
 			guardar(tabla.value, staticData);
 		}
 
 		function editarConceptoEstatico(staticId, columna, valor) {
+			let localesCambiados = [];
 			staticData[staticId][columna] = valor;
 
 			tabla.value.forEach((row, i) => {
 				if (row.staticId === staticId) {
 					tabla.value[i][columna] = valor;
+
+					localesCambiados.push(row.id);
 				}
 			});
-			tabla.value = [ ...tabla.value ];
+
+			localesCambiados.forEach(id => {
+				tabla.value = calcularPrecio(tabla.value, id);
+			});
 
 			guardar(tabla.value, staticData);
 		}
@@ -180,7 +188,9 @@ export default {
 			const fromIndexTabla = tabla.value.findIndex(row => row.id === ev.data[0].id);
 			tabla.value[fromIndexTabla].parentId = newParentId;
 
-			tabla.value = [ ...tabla.value ];
+			// Recalculo el precio de la nueva posición del elemento y de la vieja
+			tabla.value = calcularPrecio(tabla.value, tabla.value[fromIndexTabla].id);
+			tabla.value = calcularPrecio(tabla.value, ev.data[0].parentId);
 
 			guardar(tabla.value, staticData);
 		}
