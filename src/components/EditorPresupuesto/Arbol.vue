@@ -15,6 +15,7 @@
 				@rowDrop="onRowDrop"
 				@contextMenuClick="contextMenuClick"
 				@cellSave="cellSaved"
+				@cellEdit="beginEdit"
 				rowHeight="20px"
 			><e-columns>
 						<e-column field="id" :isPrimaryKey="true" width="0"></e-column>
@@ -138,6 +139,13 @@ export default {
 		}
 
 		// EDICIÓN DE CONCEPTOS //
+		function beginEdit(ev) {
+			if (ev.columnName === "valorUnitario" && (ev.rowData.tipo === "TAREA" || ev.rowData.tipo === "RUBRO")) {
+				ev.cancel = true;
+				return;
+			}
+		}
+
 		function edit(index, columna, valor) {
 			// Si la columna pertenece a la clase concepto (es de un concepto estático)
 			// cambiar el concepto estático y no el local
@@ -219,6 +227,7 @@ export default {
 			seleccionandoConcepto,
 			arbol,
 			onRowDrop,
+			beginEdit,
 		}
 	},
 
