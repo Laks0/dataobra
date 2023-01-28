@@ -56,10 +56,23 @@ import dialogoSeleccionarConcepto from "./DialogoSeleccionarConcepto.vue";
 
 import guardar from "./Composables/Guardar.js";
 import calcularPrecio from "./Composables/CalcularPrecio.js";
-import { Concepto } from "./Clases/Concepto.js";
+
+import Verbos from "./Verbos/Verbos.js";
 
 export default {
 	setup() {
+		// HISTORIAL //
+		let historial = [];
+
+		// Qué hacer con la data que devuelve el verbo depende de dónde se ejecuta
+		function ejecutarVerbo(verbo, data) {
+			let res = verbo.do(data);
+
+			historial.unshift(res.log);
+
+			return res.data;
+		}
+
 		// CONFIGURACIÓN DEL ÁRBOL //
 		const arbol = ref(null);
 
@@ -147,36 +160,13 @@ export default {
 		}
 
 		function edit(index, columna, valor) {
-			// Si la columna pertenece a la clase concepto (es de un concepto estático)
-			// cambiar el concepto estático y no el local
-			let colConcepto = Object.getOwnPropertyNames(new Concepto);
-			if (colConcepto.includes(columna)) {
-				let fila = tabla.value[index];
-				editarConceptoEstatico(fila.staticId, columna, valor);
-				return
-			}
-
-			tabla.value[index][columna] = valor;
-			tabla.value = calcularPrecio(tabla.value, tabla.value[index].id);
-
-			guardar(tabla.value, staticData);
-		}
-
-		function editarConceptoEstatico(staticId, columna, valor) {
-			let localesCambiados = [];
-			staticData[staticId][columna] = valor;
-
-			tabla.value.forEach((row, i) => {
-				if (row.staticId === staticId) {
-					tabla.value[i][columna] = valor;
-
-					localesCambiados.push(row.id);
-				}
+			let res = ejecutarVerbo(Verbos.editar, {
+				staticData: staticData.value, tabla: tabla.value,
+				columna, valor, index
 			});
 
-			localesCambiados.forEach(id => {
-				tabla.value = calcularPrecio(tabla.value, id);
-			});
+			tabla.value = [...res.tabla];
+			staticData.value = res.staticData;
 
 			guardar(tabla.value, staticData);
 		}
